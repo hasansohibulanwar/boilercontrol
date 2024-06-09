@@ -130,7 +130,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Sensor Statistics</h4>
+                            <h4>Sensor Statistik</h4>
                         </div>
                         <div class="card-body">
                             <div id="sensor-chart" class="container mb-4"></div>
