@@ -1,4 +1,3 @@
-{{-- resources/views/dashboard/heater.blade.php --}}
 @extends('kerangka.master')
 @section('title', 'Configuration Heater')
 @section('content')
@@ -10,19 +9,15 @@
                     <h4>Configuration Heater</h4>
                 </div>
                 <div class="card-body">
-                    <form>
+                    <form id="heaterForm">
                         <h5>Mode</h5>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="mode" id="modeManual" value="manual" checked>
-                            <label class="form-check-label" for="modeManual">
-                                Manual
-                            </label>
+                            <label class="form-check-label" for="modeManual">Manual</label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="mode" id="modeAutomatic" value="automatic">
-                            <label class="form-check-label" for="modeAutomatic">
-                                Otomatis
-                            </label>
+                            <label class="form-check-label" for="modeAutomatic">Otomatis</label>
                         </div>
 
                         <div id="manualSettings" class="mt-4">
@@ -67,6 +62,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const modeAutomatic = document.getElementById('modeAutomatic');
     const manualSettings = document.getElementById('manualSettings');
     const automaticSettings = document.getElementById('automaticSettings');
+    const heaterSwitch = document.getElementById('heaterSwitch');
+    const heaterForm = document.getElementById('heaterForm');
 
     modeManual.addEventListener('change', function () {
         if (this.checked) {
@@ -80,6 +77,37 @@ document.addEventListener('DOMContentLoaded', function () {
             manualSettings.classList.add('d-none');
             automaticSettings.classList.remove('d-none');
         }
+    });
+
+    heaterForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        const heaterStatus = heaterSwitch.checked ? 'on' : 'off';
+        const maxTemp = document.getElementById('maxTemp').value;
+        const minTemp = document.getElementById('minTemp').value;
+
+        const data = {
+            mode: mode,
+            heaterStatus: heaterStatus,
+            max_temp: maxTemp,
+            min_temp: minTemp
+        };
+
+        fetch('{{ route('api.heater.store') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
     });
 });
 </script>

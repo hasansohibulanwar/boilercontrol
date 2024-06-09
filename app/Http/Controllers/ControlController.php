@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ControlController extends Controller
 {
-    public function index()
+    public function getControlSettings()
     {
-        return response()->json([
-            'heater' => true, // Or dynamic value
-            'lamp' => false   // Or dynamic value
-        ], 200);
+        $controlSettings = [
+            'heater' => Cache::get('heater_control', ['heaterStatus' => 'OFF']),
+            'lamp' => Cache::get('lamp_control', ['mode' => 'OFF']),
+        ];
+
+        return response()->json($controlSettings);
     }
 }

@@ -21,20 +21,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::get('/', function () {
-//     return view('kerangka.master');
-// });
-
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/', [LoginController::class, 'index'])->name('login')->middleware('guest');
 Route::post('/login', [LoginController::class, 'login'])->name('login.store');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
 Route::get('/register', [RegisterController::class, 'index'])->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
 
 // Heater routes
-Route::get('/heater', [HeaterController::class, 'index'])->name('heater.index');
+Route::middleware('auth')->group(function () {
+    Route::get('/heater', [HeaterController::class, 'index'])->name('heater.index');
+    Route::post('/api/heater/store', [HeaterController::class, 'store'])->name('api.heater.store');
+    Route::get('/api/control', [HeaterController::class, 'control'])->name('api.control');
+});
 
 // Lamp routes
 Route::get('/lamp', [LampController::class, 'index'])->name('lamp.index');

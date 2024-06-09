@@ -20,7 +20,7 @@
                                     @if ($latestSensorData)
                                         {{ $latestSensorData->temperature . '°C' }}
                                     @else
-                                        26.70 °C
+                                        16 °C
                                     @endif
                                 </h6>
                                 <div class="progress mt-2" style="height: 4px;">
@@ -45,7 +45,7 @@
                                     @if ($latestSensorData)
                                         {{ $latestSensorData->humidity . '%' }}
                                     @else
-                                        85.00 %
+                                        24 %
                                     @endif
                                 </h6>
                                 <div class="progress mt-2" style="height: 4px;">
@@ -70,7 +70,7 @@
                                     @if ($latestSensorData)
                                         {{ $latestSensorData->ldrValue . ' lux' }}
                                     @else
-                                        2
+                                        28
                                     @endif
                                 </h6>
                                 <div class="progress mt-2" style="height: 4px;">
@@ -92,10 +92,10 @@
                             <div>
                                 <h6 class="text-muted font-semibold">Heater Status</h6>
                                 <h6 class="font-extrabold mb-0">
-                                    @if ($controlSettings !== null && isset($controlSettings['heater']))
-                                        {{ $controlSettings['heater'] ? 'ON' : 'OFF' }}
+                                    @if ($controlSettings && isset($controlSettings['heater']['heaterStatus']))
+                                        {{ $controlSettings['heater']['heaterStatus'] == 'on' ? 'ON' : 'OFF' }}
                                     @else
-                                    ON
+                                        ON
                                     @endif
                                 </h6>
                             </div>
@@ -114,10 +114,10 @@
                             <div>
                                 <h6 class="text-muted font-semibold">Lamp Status</h6>
                                 <h6 class="font-extrabold mb-0">
-                                    @if ($controlSettings !== null && isset($controlSettings['lamp']))
-                                        {{ $controlSettings['lamp'] ? 'ON' : 'OFF' }}
+                                    @if ($controlSettings && isset($controlSettings['lamp']['mode']))
+                                        {{ $controlSettings['lamp']['mode'] == 'automatic' ? 'Automatic' : 'Manual' }}
                                     @else
-                                    ON
+                                        ON
                                     @endif
                                 </h6>
                             </div>
@@ -130,7 +130,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Sensor Statistik</h4>
+                            <h4>Sensor Statistics</h4>
                         </div>
                         <div class="card-body">
                             <div id="sensor-chart" class="container mb-4"></div>
@@ -140,6 +140,7 @@
             </div>
             <!-- Activity Logs -->
             <div class="row mt-4">
+                <!-- Heater Activity Log -->
                 <div class="col-12 col-xl-6 mb-4">
                     <div class="card">
                         <div class="card-header">
@@ -149,31 +150,48 @@
                             <div class="table-responsive">
                                 <table class="table table-hover table-lg">
                                     <tbody>
-                                        <tr>
-                                            <td class="col-3">
-                                                <div class="d-flex align-items-center">
-                                                    <svg class="bi text-primary" width="10" height="10" fill="blue">
-                                                        <use xlink:href="{{ asset('template/images/bootstrap-icons.svg#circle-fill') }}" />
-                                                    </svg>
-                                                    <p class="font-bold ms-3 mb-0">
-                                                        @if (isset($heaterLogs))
-                                                            @foreach ($heaterLogs as $log)
-                                                                {{ $log }}
-                                                            @endforeach
-                                                        @else
-                                                            2
-                                                        @endif
-                                                    </p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- Add more logs here -->
+                                        @if (isset($heaterLogs) && count($heaterLogs) > 0)
+                                            @foreach ($heaterLogs as $log)
+                                                <tr>
+                                                    <td class="col-3">
+                                                        <div class="d-flex align-items-center">
+                                                            <svg class="bi text-primary" width="10" height="10" fill="blue">
+                                                                <use xlink:href="{{ asset('template/images/bootstrap-icons.svg#circle-fill') }}" />
+                                                            </svg>
+                                                            <p class="font-bold ms-3 mb-0">
+                                                                {{ $log->message }} at {{ $log->created_at }}
+                                                            </p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td class="col-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="me-3">
+                                                            <svg class="bi text-primary" width="10" height="10" fill="blue">
+                                                                <use xlink:href="{{ asset('template/images/bootstrap-icons.svg#circle-fill') }}" />
+                                                            </svg>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="font-bold mb-0">ON</h6>
+                                                            <span class="text-muted">2°C</span>
+                                                            <div id="heater-chart-europe" class="sparkline"></div>
+                                                        </div>
+
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
                 </div>
+                <!-- Lamp Activity Log -->
                 <div class="col-12 col-xl-6 mb-4">
                     <div class="card">
                         <div class="card-header">
@@ -183,25 +201,41 @@
                             <div class="table-responsive">
                                 <table class="table table-hover table-lg">
                                     <tbody>
-                                        <tr>
-                                            <td class="col-3">
-                                                <div class="d-flex align-items-center">
-                                                    <svg class="bi text-primary" width="10" height="10" fill="blue">
-                                                        <use xlink:href="{{ asset('template/images/bootstrap-icons.svg#circle-fill') }}" />
-                                                    </svg>
-                                                    <p class="font-bold ms-3 mb-0">
-                                                        @if (isset($lampLogs))
-                                                            @foreach ($lampLogs as $log)
-                                                                {{ $log }}
-                                                            @endforeach
-                                                        @else
-                                                           ON
-                                                        @endif
-                                                    </p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- Add more logs here -->
+                                        @if (isset($lampLogs) && count($lampLogs) > 0)
+                                            @foreach ($lampLogs as $log)
+                                                <tr>
+                                                    <td class="col-3">
+                                                        <div class="d-flex align-items-center">
+                                                            <svg class="bi text-primary" width="10" height="10" fill="blue">
+                                                                <use xlink:href="{{ asset('template/images/bootstrap-icons.svg#circle-fill') }}" />
+                                                            </svg>
+                                                            <p class="font-bold ms-3 mb-0">
+                                                                {{ $log->message }} at {{ $log->created_at }}
+                                                            </p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td class="col-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="me-3">
+                                                            <svg class="bi text-primary" width="10" height="10" fill="blue">
+                                                                <use xlink:href="{{ asset('template/images/bootstrap-icons.svg#circle-fill') }}" />
+                                                            </svg>
+                                                        </div>
+                                                        <div>
+                                                            <h6 class="font-bold mb-0">ON</h6>
+                                                            <span class="text-muted">°C</span>
+                                                            <div id="lamp-chart-europe" class="sparkline"></div>
+                                                        </div>
+
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>
@@ -230,13 +264,14 @@
 </div>
 
 <script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.min.js"></script>
 <script>
 Highcharts.chart('sensor-chart', {
     chart: {
         type: 'column'
     },
     title: {
-        text: 'Sensor Statistik'
+        text: 'Sensor Statistics'
     },
     xAxis: {
         categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -274,6 +309,58 @@ Highcharts.chart('sensor-chart', {
         pointPadding: 0.4,
         pointPlacement: 0.2
     }]
+});
+
+$(document).ready(function() {
+    $('#heater-chart-europe').sparkline([5, 6, 7, 9, 9, 5, 3, 2, 4, 6, 7, 2], {
+        type: 'line',
+        width: '100%',
+        height: '50',
+        lineColor: '#f39c12',
+        fillColor: '#f39c12',
+        spotColor: '#f39c12',
+        minSpotColor: '#f39c12',
+        maxSpotColor: '#f39c12',
+        highlightSpotColor: '#f39c12',
+        highlightLineColor: '#f39c12'
+    });
+    $('#heater-chart-america').sparkline([2, 3, 4, 2, 5, 6, 7, 3, 2, 4, 1, 5], {
+        type: 'line',
+        width: '100%',
+        height: '50',
+        lineColor: '#3498db',
+        fillColor: '#3498db',
+        spotColor: '#3498db',
+        minSpotColor: '#3498db',
+        maxSpotColor: '#3498db',
+        highlightSpotColor: '#3498db',
+        highlightLineColor: '#3498db'
+    });
+
+    $('#lamp-chart-europe').sparkline([5, 6, 7, 9, 9, 5, 3, 2, 4, 6, 7, 2], {
+        type: 'line',
+        width: '100%',
+        height: '50',
+        lineColor: '#f39c12',
+        fillColor: '#f39c12',
+        spotColor: '#f39c12',
+        minSpotColor: '#f39c12',
+        maxSpotColor: '#f39c12',
+        highlightSpotColor: '#f39c12',
+        highlightLineColor: '#f39c12'
+    });
+    $('#lamp-chart-america').sparkline([2, 3, 4, 2, 5, 6, 7, 3, 2, 4, 1, 5], {
+        type: 'line',
+        width: '100%',
+        height: '50',
+        lineColor: '#3498db',
+        fillColor: '#3498db',
+        spotColor: '#3498db',
+        minSpotColor: '#3498db',
+        maxSpotColor: '#3498db',
+        highlightSpotColor: '#3498db',
+        highlightLineColor: '#3498db'
+    });
 });
 </script>
 @endsection
