@@ -1,22 +1,22 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\dashboardController;
 use App\Http\Controllers\DeviceController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\loginController;
+use App\Http\Controllers\registerController;
 use App\Http\Controllers\HeaterController;
 use App\Http\Controllers\LampController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [LoginController::class, 'index'])->name('login')->middleware('guest');
-Route::post('/login', [LoginController::class, 'login'])->name('login.store');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('/', [loginController::class, 'index'])->name('login')->middleware('guest');
+Route::post('/login', [loginController::class, 'login'])->name('login.store');
+Route::post('/logout', [loginController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard')->middleware('auth');
-Route::get('/register', [RegisterController::class, 'index'])->name('register');
-Route::post('/register', [RegisterController::class, 'store'])->name('register.store');
+Route::get('/dashboard', [dashboardController::class, 'index'])->name('dashboard')->middleware('auth');
+Route::get('/register', [registerController::class, 'index'])->name('register');
+Route::post('/register', [registerController::class, 'store'])->name('register.store');
 
 // Heater routes
 Route::middleware('auth')->group(function () {

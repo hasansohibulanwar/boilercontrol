@@ -7,7 +7,7 @@ use App\Models\SensorData;
 use App\Models\ActivityLog; // Import the ActivityLog model
 use Illuminate\Support\Facades\Http;
 
-class DashboardController extends Controller
+class dashboardController extends Controller
 {
     public function index()
     {
